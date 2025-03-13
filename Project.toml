@@ -1,0 +1,19 @@
+name = "ExponentialQueues"
+uuid = "8f3a112f-b142-4e59-ac86-373e9eb88260"
+authors = ["Alfredo Braunstein"]
+version = "1.0.0-DEV"
+
+[deps]
+CavityTools = "217fe2f1-7e3d-419f-9934-cd6900c2759a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[compat]
+CavityTools = "1.2.2"
+Random = "1.11.0"
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

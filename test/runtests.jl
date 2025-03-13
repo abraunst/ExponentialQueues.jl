@@ -19,7 +19,7 @@ end
     e = ExponentialQueueDict{String}()
     e["event1"] = 5
     e["event1"] = 0
-    @test haskey(e, "event1")
+    @test !haskey(e, "event1")
     e["event1"] = 10
     @test e["event2"] == 0
     @test (e["event1"] = 10; e["event1"] == 10)

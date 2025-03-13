@@ -13,7 +13,7 @@ end
 NestedQueue(x, xs...) = NestedQueue((x,xs...))
 
 Base.isempty(nq::NestedQueue) = all(isempty(q) for (_,q) in nq.qlist)
-Base.sum(nq::NestedQueue) = sum(sum(q) for (_,q) in nq.qlist; init=0.0)
+Base.sum(nq::NestedQueue{L,E,F,I}) where {L,E,F,I} = sum(sum(q) for (_,q) in nq.qlist; init=zero(F))
 Base.length(nq::NestedQueue) = sum(length(q) for (_,q) in nq.qlist; init=0)
 Base.values(nq::NestedQueue) = Iterators.flatten(value(q) for (_,q) in nq.qlist)
 Base.keys(nq::NestedQueue) = Iterators.flatten(keys(q) for (_,q) in nq.qlist)

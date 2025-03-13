@@ -7,7 +7,6 @@ struct ExponentialQueue <: AbstractExponentialQueue{Int,Float64}
     ridx::Vector{Int}
 end
 
-
 """
 `ExponentialQueue()` keeps an updatable queue of up to `N` events with ids `1...N` and contant rates Q[1] ... Q[N]. 
 This is intended for sampling in continuous time.
@@ -52,7 +51,6 @@ Base.sum(Q::AbstractExponentialQueue) = sum(Q.acc)
 function Base.show(io::IO, Q::ExponentialQueue) 
     print(io, "ExponentialQueue(", [i=>r for (i,r) in zip(Q.ridx, Q.acc.sums[1])], ")")
 end
-
 
 """
 `ExponentialQueueDict{K}` keeps an updatable queue of elements of type `K` with contant rates Q[k]. 
@@ -108,11 +106,11 @@ function _addidx(e::ExponentialQueueDict, i)
 end
 
 function Base.setindex!(e::AbstractExponentialQueue, p, i)
-    #if p <= 0
-    #    # do not store null rates
-    #    haskey(e, i) && delete!(e, i)
-    #    return p
-    #end
+    if p <= 0
+        # do not store null rates
+        haskey(e, i) && delete!(e, i)
+        return p
+    end
 
     if haskey(e, i)
         e.acc[e.idx[i]] = p
@@ -143,7 +141,6 @@ function Base.delete!(e::AbstractExponentialQueue, i)
     _deleteidx!(e, i)
     e
 end
-
 
 """
 k,t = peek(Q): Sample next event and time from the queue.

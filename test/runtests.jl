@@ -51,4 +51,18 @@ end
     @test e4 == e5
 end
 
+@testset "ConstantQueue" begin
+    C = ConstantQueue('a':'f', 0.5)
+    @test C['a'] == 0.5
+    @test !haskey(C, 'g')
+    @test peekevent(C) ∈ 'a':'f'
+end
+
+@testset "NestedQueue" begin
+    Q = ExponentialQueue(i=>i for i in 1:10)
+    N = NestedQueue(i => i*Q for i in 20:30)
+    i,j = peekevent(N)
+    @test i ∈ 20:30 && j ∈ 1:10
+end
+
 nothing

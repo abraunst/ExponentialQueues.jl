@@ -19,7 +19,7 @@ Base.isempty(q::ConstantQueue) = isempty(q.events)
 Base.length(q::ConstantQueue) = length(q.events)
 
 Base.values(cq::ConstantQueue) = Iterators.repeated(cq.rate[], length(cq.events))
-Base.keys(cq::ConstantQueue) = events
+Base.keys(cq::ConstantQueue) = cq.events
 
 function Base.iterate(cq::ConstantQueue, s = nothing)
     res = isnothing(s) ? iterate(cq.events) : iterate(cq.events, s)

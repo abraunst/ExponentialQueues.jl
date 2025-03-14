@@ -1,7 +1,9 @@
-struct ConstantQueue{T,F} <: AbstractExponentialQueue{T,F}
+struct ConstantQueue{T,I,F} <: AbstractExponentialQueue{I,F}
     events::T
     rate::F
 end
+
+ConstantQueue(events::T, rate::F) where {T,F} = ConstantQueue{T,eltype(events),F}(events,rate)
 
 Base.sum(cq::ConstantQueue) = cq.rate[] * length(cq)
 

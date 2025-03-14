@@ -12,7 +12,11 @@ Base.sum(mq::MultQueue) = mq.f[]*sum(mq.q)
 Base.length(mq::MultQueue) = length(mq.q)
 Base.isempty(mq::MultQueue) = isempty(mq.q)
 peekevent(mq::MultQueue; rng = Random.default_rng()) = peekevent(mq.q; rng)
-Base.peek(mq::MultQueue; rng = Random.default_rng()) = peekevent(mq.q; rng) => randexp()/mq.f[]
+Base.peek(mq::MultQueue; rng = Random.default_rng()) = peekevent(mq.q; rng) => randexp(rng)/sum(mq)
+function Base.pop!(mq::MultQueue; rng = Random.default_rng())
+    i, t = pop!(mq.q; rng)
+    return i, t / mq.f[]
+end
 Base.values(mq::MultQueue) = (mq.f[]*v for v in values(nq.q))
 Base.keys(mq::MultQueue) = keys(mq.q)
 function Base.iterate(mq::MultQueue, s = nothing)

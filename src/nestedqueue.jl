@@ -6,7 +6,7 @@ struct NestedQueue{L,E,F,I} <: AbstractExponentialQueue{Pair{E,I},F}
         geti(::AbstractExponentialQueue{I,F}) where {I,F} = I
         I = promote_type((geti(q) for (_,q) in qlist)...)
         F = promote_type((getf(q) for (_,q) in qlist)...)
-        new{L,E,F,I}(qlist)
+        return new{L,E,F,I}(qlist)
     end 
 end
 
@@ -19,27 +19,40 @@ Base.values(nq::NestedQueue) = Iterators.flatten(value(q) for (_,q) in nq.qlist)
 Base.keys(nq::NestedQueue) = Iterators.flatten(keys(q) for (_,q) in nq.qlist)
 function Base.iterate(nq::NestedQueue)
     (a,(b, v)), s = iterate(Iterators.flatten(zip(Iterators.repeated(e),q) for (e,q) in nq.qlist))
-    ((a => b) => v), s
+    return ((a => b) => v), s
 end
 
 function Base.iterate(nq::NestedQueue, s)
     (a, (b, v)), s = iterate(Iterators.flatten(zip(Iterators.repeated(e),q) for (e,q) in nq.qlist), s)
-    ((a => b) => v), s
+    return ((a => b) => v), s
 end
 
 
-function peekevent(nq::NestedQueue; rng = Random.default_rng(), s = sum(nq))
+function pickqueue(nq::NestedQueue; rng, s = sum(nq))
     r::Float64 = rand(rng) * s
     for (e,q) in nq.qlist
         r -= sum(q)
         if r <= 0
-            return e => peekevent(q; rng)
+            return e,q
         end
     end
     @assert false
 end
 
+function peekevent(nq::NestedQueue; rng = Random.default_rng())
+    e,q = pickqueue(nq; rng)
+    return e => peekevent(q; rng)
+end
+
 function Base.peek(nq::NestedQueue; rng = Random.default_rng())
     s = sum(nq)
-    peekevent(nq; rng, s) => randexp(rng)/s
+    e,q = pickqueue(nq; rng, s)
+    return (e => peekevent(q; rng)) => randexp(rng)/s
+end
+
+function Base.pop!(nq::NestedQueue; rng = Random.default_rng())
+    s = sum(nq)
+    e, q = pickqueue(nq; rng, s)
+    i, _ = pop!(q; rng)
+    return (e => i) => randexp(rng)/s
 end

@@ -10,6 +10,9 @@ struct NestedQueue{L,E,F,I} <: AbstractExponentialQueue{Pair{E,I},F}
     end 
 end
 
+"""
+A `NestedQueue` holds a container of exponential queues 
+"""
 NestedQueue(x, xs...) = NestedQueue((x,xs...))
 
 Base.isempty(nq::NestedQueue) = all(isempty(q) for (_,q) in nq.qlist)

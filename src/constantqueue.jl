@@ -3,6 +3,11 @@ struct ConstantQueue{T,I,F} <: AbstractExponentialQueue{I,F}
     rate::F
 end
 
+"""
+`ConstantQueue(evs, r)` hold a queue with events in the container `evs`, all with 
+the same rate `r`. The `evs` container should support `delete!(evs, i)` (e.g. if 
+evs is a `Set`) for the queue to support `pop!`. 
+"""
 ConstantQueue(events::T, rate::F) where {T,F} = ConstantQueue{T,eltype(events),F}(events,rate)
 
 Base.sum(cq::ConstantQueue) = cq.rate[] * length(cq)

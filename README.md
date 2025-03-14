@@ -16,8 +16,8 @@ The libary implements the following types:
 
 * `ConstantRate`: a queue with `N` events of uniform rate `r`. Sampling cost is `O(1)`.
 
-* `MultQueue`: a composed queue which represnts a multiple of another queue.
+* `MultQueue`: a composed queue which represents a multiple of another queue.
 
 * `NestedQueue` a mixed queue which represents the union of an arbitrary number of other queues.
 
-These types are aritrarily composable.
+These types are arbitrarily composable.

@@ -22,9 +22,9 @@ Base.values(cq::ConstantQueue) = Iterators.repeated(cq.rate[], length(cq.events)
 Base.keys(cq::ConstantQueue) = cq.events
 
 function Base.pop!(cq::ConstantQueue; rng = Random.default_rng())
-    i,t = peek(cq, rng)
+    i,t = peek(cq; rng)
     delete!(cq, i)
-    return i,t
+    return i => t
 end
 
 function Base.iterate(cq::ConstantQueue, s = nothing)

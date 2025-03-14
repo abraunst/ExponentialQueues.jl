@@ -23,3 +23,5 @@ function Base.iterate(mq::MultQueue, s = nothing)
     res = isnothing(s) ? iterate(mq.q) : iterate(mq.q, s)
     isnothing(res) ? res : ((res[1].first => mq.f[]*res[1].second), res[2])
 end
+
+Base.delete!(mq::MultQueue, i) = delete!(mq.q, i) 

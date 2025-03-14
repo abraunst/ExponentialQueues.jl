@@ -3,7 +3,7 @@ struct ConstantQueue{T,F} <: AbstractExponentialQueue{T,F}
     rate::F
 end
 
-Base.sum(cq::ConstantQueue) = cq.rate[] * length(events)
+Base.sum(cq::ConstantQueue) = cq.rate[] * length(cq)
 
 function Base.getindex(q::ConstantQueue, i)
     @boundscheck i in q.events || throw(BoundsError(q.events, i))

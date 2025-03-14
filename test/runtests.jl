@@ -2,6 +2,7 @@ using ExponentialQueues
 using Test
 using Random
 
+
 @testset "ExponentialQueue" begin
     e = ExponentialQueue([5=>10.0, 10=>0.0])
     i,t = peek(e)
@@ -49,6 +50,17 @@ end
     @test eltype(e4) == Pair{String,Rational{Int}}
     e5 = ExponentialQueueDict(["A"=>1/2, "B"=>1/4, "C"=>1/4])
     @test e4 == e5
+end
+
+@testset "Reproducibility" begin
+    Q = ExponentialQueue(i=>i for i in 1:1000)
+    C = ConstantQueue(1:10, 0.5)
+    N = NestedQueue(:a => Q, :b => 2Q, :c => 3Q, :d => 2C)
+    for i in 1:10
+        x1 = peek(N; rng = MersenneTwister(0))
+        x2 = peek(N; rng = MersenneTwister(0))
+        @test x1 == x2
+    end
 end
 
 @testset "ConstantQueue" begin

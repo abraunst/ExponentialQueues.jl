@@ -6,7 +6,7 @@ This library implements a series of event queues with rates to sample a Poisson 
 
 * Changing rates, inserting and removing events have cost `O(log(N))` where `N` is the number of events.
 
-* Sampling cost is `O(log(N))`
+* Sampling cost (via `peek`, `peekevent`, `pop!`) is `O(log(N))`
 
 The libary implements the following types:
 
@@ -14,7 +14,7 @@ The libary implements the following types:
 
 * `ExponentialQueueDict{I,F}`: an updatable queue of events `i::I` and rates `Q[i]::F`. Its interface follows the one of `Dict{I,F}`.
 
-* `ConstantRate`: a queue with `N` events of uniform rate `r`
+* `ConstantRate`: a queue with `N` events of uniform rate `r`. Sampling cost is `O(1)`.
 
 * `MultQueue`: a composed queue which represnts a multiple of another queue.
 

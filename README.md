@@ -12,7 +12,7 @@ The libary implements the following types:
 
 * `ExponentialQueue`: an updatable queue of up to `N` events with ids `1...N` and rates `Q[1]` ... `Q[N]`. Its interface follows the one of `Dict{Int,Float64}`.
 
-* `ExponentialQueueDict{I,F}`: an updatable queue of events `i::I` and rates `Q[i]::F`. Its interface follows the one of `Dict{I,F}`.
+* `ExponentialQueueDict{I}`: an updatable queue of events `i::I` and rates `Q[i]::Float64`. Its interface follows the one of `Dict{I,Float64}`.
 
 * `ConstantRate`: a queue with `N` events of uniform rate `r`. Sampling cost is `O(1)`.
 

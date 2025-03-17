@@ -27,3 +27,4 @@ end
 Base.delete!(mq::MultQueue, i) = delete!(mq.q, i)
 Base.setindex!(mq::MultQueue, v) = setindex!(mq.f, v)
 Base.getindex(mq::MultQueue) = mq.f[]
+Base.getindex(mq::MultQueue, i) = mq.q[i]*mq.f[]

@@ -70,6 +70,18 @@ end
     @test peekevent(C) ∈ 'a':'f'
 end
 
+@testset "MultQueue" begin
+    Q = ExponentialQueue((1 => 3.0, 2 => 7.0))
+    @test collect(2Q) == collect(Q*2)
+    @test sum(5Q) == 5sum(Q)
+    @test !isempty(2Q)
+    @test (2Q)[1] == 6.0
+    Q2 = 2Q
+    pop!(Q2)
+    pop!(Q2)
+    @test isempty(Q2)
+end
+
 @testset "NestedQueue" begin
     Q = ExponentialQueue(i=>i for i in 1:10)
     N = NestedQueue(i => i*Q for i in 20:30)

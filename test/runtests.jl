@@ -83,6 +83,7 @@ end
 @testset "MultQueue" begin
     Q = ExponentialQueue((1 => 3.0, 2 => 7.0, 3 => 9.0))
     Q2 = 2Q
+    @test Set(keys(Q2)) == Set(keys(Q))
     Q5 = 5Q
     Q5[] = 4
     @test Q5[] == 4
@@ -95,7 +96,9 @@ end
     @test sum(Q5) == 5sum(Q)
     @test !isempty(2Q)
     @test (2Q)[1] == 6.0
-    pop!(Q2)
+    delete!(Q2, 1)
+    i,t = peek(Q2)
+    @test i == 2
     pop!(Q2)
     @test isempty(Q2)
 end

@@ -1,6 +1,7 @@
 # ExponentialQueues
 
 [![Build Status](https://github.com/abraunst/ExponentialQueues.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/abraunst/ExponentialQueues.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/abraunst/ExponentialQueues.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/abraunst/ExponentialQueues.jl)
 
 This library implements a series of event queues with rates to sample a Poisson point process with constant rates (in the specific sense that rates don't change between events, but can cange at event instants). It is specifically optimized such that:
 

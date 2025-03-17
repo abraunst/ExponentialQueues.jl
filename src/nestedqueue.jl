@@ -21,9 +21,9 @@ Base.sum(nq::NestedQueue{L,E,F,I}) where {L,E,F,I} = sum(sum(q) for (_,q) in nq.
 
 Base.length(nq::NestedQueue) = sum(length(q) for (_,q) in nq.qlist; init=0)
 
-Base.values(nq::NestedQueue) = Iterators.flatten(value(q) for (_,q) in nq.qlist)
+Base.values(nq::NestedQueue) = Iterators.flatten(values(q) for (_,q) in nq.qlist)
 
-Base.keys(nq::NestedQueue) = Iterators.flatten(keys(q) for (_,q) in nq.qlist)
+Base.keys(nq::NestedQueue) = (i for (i,v) in nq)
 
 function Base.iterate(nq::NestedQueue, ss...)
     res = iterate(Iterators.flatten(zip(Iterators.repeated(e),q) for (e,q) in nq.qlist), ss...)

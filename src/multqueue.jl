@@ -17,7 +17,7 @@ function Base.pop!(mq::MultQueue; rng = Random.default_rng())
     i, t = pop!(mq.q; rng)
     return i, t / mq.f[]
 end
-Base.values(mq::MultQueue) = (mq.f[]*v for v in values(nq.q))
+Base.values(mq::MultQueue) = (mq.f[]*v for v in values(mq.q))
 Base.keys(mq::MultQueue) = keys(mq.q)
 function Base.iterate(mq::MultQueue, s = nothing)
     res = isnothing(s) ? iterate(mq.q) : iterate(mq.q, s)

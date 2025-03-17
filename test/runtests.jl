@@ -107,6 +107,10 @@ end
     @test i ∈ 20:30 && j ∈ 1:10
     @test sum(v for (i,v) in N) == sum(N) == sum(values(N))
     @test Set(i for (i,v) in N) == Set(keys(N)) == Set(i => j for i in 20:30 for j in 1:10)
+    while !isempty(N)
+        pop!(N)
+    end
+    @test isempty(N)
 end
 
 nothing

@@ -68,15 +68,33 @@ end
     @test C['a'] == 0.5
     @test !haskey(C, 'g')
     @test peekevent(C) ∈ 'a':'f'
+    @test Set(collect(C)) == Set(i => 0.5 for i in 'a':'f')
+    D = ConstantQueue(Set(1:10), 0.5)
+    @test Set(collect(D)) == Set([i => 0.5 for i in 1:10])
+    @test peek(D).first in 1:10
+    @test collect(values(D)) == fill(0.5, length(D))
+    @test map(1:length(D)) do _
+        i,_ = pop!(D)
+        i
+    end |> Set == Set(1:10)
+    @test isempty(D)
 end
 
 @testset "MultQueue" begin
-    Q = ExponentialQueue((1 => 3.0, 2 => 7.0))
+    Q = ExponentialQueue((1 => 3.0, 2 => 7.0, 3 => 9.0))
+    Q2 = 2Q
+    Q5 = 5Q
+    Q5[] = 4
+    @test Q5[] == 4
+    @test Q2[] == 2
+    @test Q5[1] == 12
+    Q5[] = 5
+    delete!(Q, 3)
+    @test length(Q) == 2
     @test collect(2Q) == collect(Q*2)
-    @test sum(5Q) == 5sum(Q)
+    @test sum(Q5) == 5sum(Q)
     @test !isempty(2Q)
     @test (2Q)[1] == 6.0
-    Q2 = 2Q
     pop!(Q2)
     pop!(Q2)
     @test isempty(Q2)

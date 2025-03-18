@@ -16,6 +16,22 @@ using Random
     @test isempty(e)
 end
 
+@testset "StaticExponentialQueue" begin
+    e = StaticExponentialQueue(10)
+    e[5] = 10
+    e[10] = 0
+    i,t = peek(e)
+    @test i == 5
+    @test !isempty(e)
+    i,t = pop!(e)
+    @test i == 5
+    @test !isempty(e)
+    e[10] = 5
+    empty!(e)
+    @test !isempty(e)
+end
+
+
 @testset "ExponentialQueueDict" begin
     e = ExponentialQueueDict{String}()
     e["event1"] = 5

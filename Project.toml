@@ -1,7 +1,7 @@
 name = "ExponentialQueues"
 uuid = "8f3a112f-b142-4e59-ac86-373e9eb88260"
 authors = ["Alfredo Braunstein"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 CavityTools = "217fe2f1-7e3d-419f-9934-cd6900c2759a"

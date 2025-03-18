@@ -7,6 +7,59 @@ struct ExponentialQueue <: AbstractExponentialQueue{Int,Float64}
     ridx::Vector{Int}
 end
 
+struct StaticExponentialQueue <: AbstractExponentialQueue{Int,Float64}
+    acc::Accumulator{Float64,+,zero}
+    sum::CumSum{Float64,+,zero}
+end
+
+"""
+`ExponentialQueueDict{K}` keeps an updatable queue of elements of type `K` with contant rates Q[k]. 
+This is intended for sampling in continuous time.
+
+julia> Q = ExponentialQueueDict{Int}()
+ExponentialQueueDict(Pair{Int64, Float64}[])
+
+julia> Q[1] = 1.2 # updates rate of event 1
+1.2
+
+julia> Q[55] = 2.3 # updates rate of event 55
+2.3
+
+julia> i,t = pop!(Q) # gets time and id of next event and remove it from the queue
+(55, 0.37869716808319576)
+
+See also: `StaticExponentialQueue` and `ExponentialQueue` for slightly more 
+efficient queues for the case `K == Int`
+"""
+struct ExponentialQueueDict{K,F} <: AbstractExponentialQueue{K,F}
+    acc::Accumulator{F,+,zero}
+    sum::CumSum{F,+,zero}
+    idx::Dict{K,Int}
+    ridx::Vector{K}
+    ExponentialQueueDict(acc::Accumulator{F,+,zero},sum,idx,ridx::Vector{K}) where {K,F<:Real} = new{K,F}(acc,sum,idx,ridx)
+end
+
+StaticExponentialQueue(N::Integer) = (a = Accumulator(zeros(N)); StaticExponentialQueue(a, cumsum(a)))
+
+Base.setindex!(e::StaticExponentialQueue, p, i) = setindex!(e.acc, p, i)
+Base.getindex(e::StaticExponentialQueue, i) = e.acc[i]
+
+Base.delete!(e::StaticExponentialQueue, i) = setindex!(e, 0.0, i)
+
+function peekevent(e::StaticExponentialQueue; rng = Random.default_rng())
+    searchsortedfirst(e.sum, rand(rng) * sum(e.acc))
+end
+
+Base.values(e::StaticExponentialQueue) = e.acc
+
+Base.keys(e::StaticExponentialQueue) = eachindex(e.acc)
+
+Base.empty!(e::StaticExponentialQueue) = (e.acc .= 0; e)
+
+Base.haskey(e::StaticExponentialQueue, i) = haskey(e.acc, i)
+
+Base.iterate(e::StaticExponentialQueue, s...) = iterate((i => e.acc[i] for i in eachindex(e.acc)), s...)
+
 """
 `ExponentialQueue()` keeps an updatable queue of up to `N` events with ids `1...N` and contant rates Q[1] ... Q[N]. 
 This is intended for sampling in continuous time.
@@ -52,32 +105,6 @@ function Base.show(io::IO, Q::ExponentialQueue)
     print(io, "ExponentialQueue(", [i=>r for (i,r) in zip(Q.ridx, Q.acc.sums[1])], ")")
 end
 
-"""
-`ExponentialQueueDict{K}` keeps an updatable queue of elements of type `K` with contant rates Q[k]. 
-This is intended for sampling in continuous time.
-
-julia> Q = ExponentialQueueDict{Int}()
-ExponentialQueueDict(Pair{Int64, Float64}[])
-
-julia> Q[1] = 1.2 # updates rate of event 1
-1.2
-
-julia> Q[55] = 2.3 # updates rate of event 55
-2.3
-
-julia> i,t = pop!(Q) # gets time and id of next event and remove it from the queue
-(55, 0.37869716808319576)
-
-See also: `ExponentialQueue` for a slightly more efficient queue for the case `K == Int`
-"""
-struct ExponentialQueueDict{K,F} <: AbstractExponentialQueue{K,F}
-    acc::Accumulator{F,+,zero}
-    sum::CumSum{F,+,zero}
-    idx::Dict{K,Int}
-    ridx::Vector{K}
-    ExponentialQueueDict(acc::Accumulator{F,+,zero},sum,idx,ridx::Vector{K}) where {K,F<:Real} = new{K,F}(acc,sum,idx,ridx)
-end
-
 function Base.show(io::IO, Q::ExponentialQueueDict{K,F}) where {K,F}
     print(io, "ExponentialQueueDict(", Pair{K,F}[i=>Q.acc[Q.idx[i]] for i in eachindex(Q.idx)], ")")
 end
@@ -113,7 +140,7 @@ function Base.setindex!(e::AbstractExponentialQueue, p, i)
     end
 
     if haskey(e, i)
-        e.acc[e.idx[i]] = p
+        @inbounds e.acc[e.idx[i]] = p
     else
         push!(e.acc, p)
         _addidx(e, i)
@@ -122,20 +149,21 @@ function Base.setindex!(e::AbstractExponentialQueue, p, i)
     p
 end
 
-Base.haskey(e::ExponentialQueue, i) = i ∈ eachindex(e.idx) && !iszero(e.idx[i])
+Base.haskey(e::ExponentialQueue, i) = i ∈ eachindex(e.idx) && @inbounds !iszero(e.idx[i])
 
 Base.haskey(e::ExponentialQueueDict, i) = haskey(e.idx, i)
 
-Base.getindex(e::AbstractExponentialQueue, i) = haskey(e, i) ? e.acc[e.idx[i]] : 0.0
+Base.getindex(e::AbstractExponentialQueue, i) = haskey(e, i) ? (@inbounds e.acc[e.idx[i]]) : 0.0
 
 _deleteidx!(e::ExponentialQueueDict, i) = delete!(e.idx, i)
 
-_deleteidx!(e::ExponentialQueue, i) = (e.idx[i] = 0)
+_deleteidx!(e::ExponentialQueue, i) = (@inbounds e.idx[i] = 0)
 
 function Base.delete!(e::AbstractExponentialQueue, i)
-    l, k = e.idx[i], e.ridx[length(e.acc)]
-    e.acc[l] = e.acc.sums[1][end]
-    e.idx[k], e.ridx[l] = l, k
+    @boundscheck haskey(e, i) || throw(BoundsError(e, i))
+    @inbounds l, k = e.idx[i], e.ridx[length(e.acc)]
+    @inbounds e.acc[l] = e.acc.sums[1][end]
+    @inbounds e.idx[k], e.ridx[l] = l, k
     pop!(e.acc)
     pop!(e.ridx)
     _deleteidx!(e, i)

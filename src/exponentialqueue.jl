@@ -41,6 +41,10 @@ end
 
 StaticExponentialQueue(N::Integer) = (a = Accumulator(zeros(N)); StaticExponentialQueue(a, cumsum(a)))
 
+
+StaticExponentialQueue(it) = (a = Accumulator(collect(it)); StaticExponentialQueue(a, cumsum(a)))
+
+
 Base.setindex!(e::StaticExponentialQueue, p, i) = setindex!(e.acc, p, i)
 Base.getindex(e::StaticExponentialQueue, i) = e.acc[i]
 

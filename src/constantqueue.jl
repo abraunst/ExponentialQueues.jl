@@ -21,7 +21,7 @@ Base.peek(q::ConstantQueue; rng = Random.default_rng()) = peekevent(q; rng) => r
 
 peekevent(q::ConstantQueue; rng = Random.default_rng()) = rand(rng, q.events)
 
-Base.isempty(q::ConstantQueue) = isempty(q.events)
+Base.isempty(q::ConstantQueue) = iszero(q.rate[]) || isempty(q.events)
 
 Base.length(q::ConstantQueue) = length(q.events)
 

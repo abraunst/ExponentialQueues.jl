@@ -39,11 +39,11 @@ struct ExponentialQueueDict{K,F} <: AbstractExponentialQueue{K,F}
     ExponentialQueueDict(acc::Accumulator{F,+,zero},sum,idx,ridx::Vector{K}) where {K,F<:Real} = new{K,F}(acc,sum,idx,ridx)
 end
 
-StaticExponentialQueue(N::Integer) = (a = Accumulator(zeros(N)); StaticExponentialQueue(a, cumsum(a)))
 
 
-StaticExponentialQueue(it) = (a = Accumulator(collect(it)); StaticExponentialQueue(a, cumsum(a)))
+StaticExponentialQueue(it) = (a = Accumulator(float(x) for x in it); StaticExponentialQueue(a, cumsum(a)))
 
+StaticExponentialQueue(N::Integer) = StaticExponentialQueue(zeros(N))
 
 Base.setindex!(e::StaticExponentialQueue, p, i) = setindex!(e.acc, p, i)
 Base.getindex(e::StaticExponentialQueue, i) = e.acc[i]
@@ -185,8 +185,7 @@ end
 peekevent(Q; rng): Sample next event from the queue (with probability proportional to its rate)
 """
 function peekevent(e::AbstractExponentialQueue; rng = Random.default_rng())
-    j = searchsortedfirst(e.sum, rand(rng) * sum(e.acc))
-    e.ridx[min(j, lastindex(e.ridx))]
+    e.ridx[searchsortedfirst(e.sum, rand(rng) * sum(e.acc))]
 end
 
 """

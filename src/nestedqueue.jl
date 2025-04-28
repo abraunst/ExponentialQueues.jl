@@ -2,7 +2,7 @@ struct NestedQueue{L,E,F,I} <: AbstractExponentialQueue{Pair{E,I},F}
     qlist::L
     function NestedQueue(qlist::L) where L
         E = promote_type((typeof(e) for (e,q) in qlist)...)
-        getf(::AbstractExponentialQueue{I,F}) where {I,F} = F
+        getf(::AbstractExponentialQueue{I,F}) where {I,F} = eltype(F)
         geti(::AbstractExponentialQueue{I,F}) where {I,F} = I
         I = promote_type((geti(q) for (_,q) in qlist)...)
         F = promote_type((getf(q) for (_,q) in qlist)...)

@@ -51,7 +51,7 @@ Base.getindex(e::StaticExponentialQueue, i) = e.acc[i]
 Base.delete!(e::StaticExponentialQueue, i) = setindex!(e, 0.0, i)
 
 function peekevent(e::StaticExponentialQueue; rng = Random.default_rng())
-    searchsortedfirst(e.sum, rand(rng) * sum(e.acc))
+    searchsortedfirst(e.sum, rand(rng) * sum(e.acc))::Int
 end
 
 Base.values(e::StaticExponentialQueue) = e.acc
@@ -62,7 +62,7 @@ Base.empty!(e::StaticExponentialQueue) = (e.acc .= 0; e)
 
 Base.haskey(e::StaticExponentialQueue, i) = haskey(e.acc, i)
 
-Base.iterate(e::StaticExponentialQueue, s...) = iterate((i => e.acc[i] for i in eachindex(e.acc)), s...)
+Base.iterate(e::StaticExponentialQueue, s...) = iterate(((i => e.acc[i]) for i in eachindex(e.acc)), s...)
 
 """
 `ExponentialQueue()` keeps an updatable queue of up to `N` events with ids `1...N` and contant rates Q[1] ... Q[N]. 
@@ -106,11 +106,11 @@ end
 Base.sum(Q::AbstractExponentialQueue) = sum(Q.acc)
 
 function Base.show(io::IO, Q::ExponentialQueue) 
-    print(io, "ExponentialQueue(", [i=>r for (i,r) in zip(Q.ridx, Q.acc.sums[1])], ")")
+    print(io, "ExponentialQueue(", [(i => r) for (i,r) in zip(Q.ridx, Q.acc.sums[1])], ")")
 end
 
 function Base.show(io::IO, Q::ExponentialQueueDict{K,F}) where {K,F}
-    print(io, "ExponentialQueueDict(", Pair{K,F}[i=>Q.acc[Q.idx[i]] for i in eachindex(Q.idx)], ")")
+    print(io, "ExponentialQueueDict(", Pair{K,F}[(i => Q.acc[Q.idx[i]]) for i in eachindex(Q.idx)], ")")
 end
 
 function ExponentialQueueDict{K,F}() where {K,F<:Real}
@@ -120,7 +120,7 @@ end
 
 function ExponentialQueueDict(v)
     acc = Accumulator([r for (_,r) in v])
-    ExponentialQueueDict(acc, cumsum(acc), Dict(k=>i for (i,(k,_)) in enumerate(v)), [i for (i,_) in v])
+    ExponentialQueueDict(acc, cumsum(acc), Dict(k => i for (i,(k,_)) in enumerate(v)), [i for (i,_) in v])
 end
 
 ExponentialQueueDict() = ExponentialQueueDict{Any,Float64}()
@@ -177,8 +177,8 @@ end
 """
 k,t = peek(Q): Sample next event and time from the queue.
 """
-function Base.peek(e::AbstractExponentialQueue; rng = Random.default_rng())
-    peekevent(e; rng) => randexp(rng)/sum(e.acc)
+function Base.peek(e::AbstractExponentialQueue{K,V}; rng = Random.default_rng()) where {K,V}
+    peekevent(e; rng)::K => randexp(rng)/sum(e.acc)::V
 end
 
 """
@@ -216,7 +216,7 @@ Base.values(e::ExponentialQueueDict) = e.acc
 
 Base.keys(e::ExponentialQueueDict) = e.ridx
 
-Base.iterate(e::AbstractExponentialQueue, i = 1) = length(e.acc) < i ? nothing : ((e.ridx[i]=>e.acc[i]), i+1)
+Base.iterate(e::AbstractExponentialQueue, i = 1) = length(e.acc) < i ? nothing : ((e.ridx[i] => e.acc[i]), i+1)
 
 Base.eltype(::AbstractExponentialQueue{T,F}) where {T,F} = Pair{T,F}
 

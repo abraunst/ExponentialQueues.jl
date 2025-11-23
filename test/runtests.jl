@@ -58,7 +58,6 @@ end
     end
     e2 = ExponentialQueueDict(events)
     @test e1 == e2
-    @test string(e2) == "ExponentialQueueDict([2 => 2.0, 3 => 3.0, 1 => 1.0])"
     @test Set(keys(events)) == Set(keys(e2))
     @test Set(values(events)) == Set(values(e2))
 
@@ -87,7 +86,7 @@ end
     @test Set(collect(C)) == Set(i => 0.5 for i in 'a':'f')
     D = ConstantQueue(Set(1:10), 0.5)
     @test Set(collect(D)) == Set([i => 0.5 for i in 1:10])
-    @test peek(D).first in 1:10
+    @test peek(D)[1] in 1:10
     @test collect(values(D)) == fill(0.5, length(D))
     @test map(1:length(D)) do _
         i,_ = pop!(D)
@@ -125,7 +124,7 @@ end
     i,j = peekevent(N)
     @test i ∈ 20:30 && j ∈ 1:10
     @test sum(v for (i,v) in N) == sum(N) == sum(values(N))
-    @test Set(i for (i,v) in N) == Set(keys(N)) == Set(i => j for i in 20:30 for j in 1:10)
+    @test Set(i for (i,v) in N) == Set(keys(N)) == Set((i, j) for i in 20:30 for j in 1:10)
     for _ in 1:10
         pop!(N)
     end

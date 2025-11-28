@@ -33,6 +33,13 @@ end
     @test !isempty(e)
 end
 
+@testset "StationaryQueue" begin
+    e = StationaryQueue([0,0,0,0,5,0])
+    i,t = peek(e)
+    @test i == 5
+    @test !isempty(e)
+end
+
 
 @testset "ExponentialQueueDict" begin
     e = ExponentialQueueDict{String}()

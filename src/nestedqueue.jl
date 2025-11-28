@@ -42,9 +42,9 @@ end
 
 @unroll function _pickqueue(ql,el,r)
     i = 1
-    @unroll for q in ql
+    @inbounds @unroll for q in ql
         r -= sum(q)
-        r <= 0 && return el[i],ql[i]
+        r <= 0 && return el[i],q
         i += 1
     end
     @assert false
@@ -53,9 +53,9 @@ end
 @unroll function _peek(ql,el,rng,s)
     i = 1
     r = rand(rng)*s
-    @unroll for q in ql
+    @inbounds @unroll for q in ql
         r -= sum(q)
-        r <= 0 && return (el[i],peekevent(ql[i]; rng)) => randexp(rng)/s
+        r <= 0 && return (el[i],peekevent(q; rng)) => randexp(rng)/s
         i += 1
     end
     @assert false

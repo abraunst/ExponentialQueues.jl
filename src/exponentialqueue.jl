@@ -1,13 +1,15 @@
 abstract type AbstractExponentialQueue{T,F} <: AbstractDict{T, F} end
 
-struct ExponentialQueue <: AbstractExponentialQueue{Int,Float64}
+abstract type AbstractCumSumQueue{T, F} <: AbstractExponentialQueue{T,F} end
+
+struct ExponentialQueue <: AbstractCumSumQueue{Int,Float64}
     acc::Accumulator{Float64,+,zero}
     sum::CumSum{Float64,+,zero}
     idx::Vector{Int}
     ridx::Vector{Int}
 end
 
-struct StaticExponentialQueue <: AbstractExponentialQueue{Int,Float64}
+struct StaticExponentialQueue <: AbstractCumSumQueue{Int,Float64}
     acc::Accumulator{Float64,+,zero}
     sum::CumSum{Float64,+,zero}
 end
@@ -31,7 +33,7 @@ julia> i,t = pop!(Q) # gets time and id of next event and remove it from the que
 See also: `StaticExponentialQueue` and `ExponentialQueue` for slightly more 
 efficient queues for the case `K == Int`
 """
-struct ExponentialQueueDict{K,F} <: AbstractExponentialQueue{K,F}
+struct ExponentialQueueDict{K,F} <: AbstractCumSumQueue{K,F}
     acc::Accumulator{F,+,zero}
     sum::CumSum{F,+,zero}
     idx::Dict{K,Int}
@@ -103,7 +105,7 @@ end
 
 @deprecate ExponentialQueue(N::Integer) ExponentialQueue()
 
-Base.sum(Q::AbstractExponentialQueue) = sum(Q.acc)
+Base.sum(Q::AbstractCumSumQueue) = sum(Q.acc)
 
 function Base.show(io::IO, Q::ExponentialQueue) 
     print(io, "ExponentialQueue(", [(i => r) for (i,r) in zip(Q.ridx, Q.acc.sums[1])], ")")
@@ -136,7 +138,7 @@ function _addidx(e::ExponentialQueueDict, i)
     e.idx[i] = length(e.acc)
 end
 
-function Base.setindex!(e::AbstractExponentialQueue, p, i)
+function Base.setindex!(e::AbstractCumSumQueue, p, i)
     if p <= 0
         # do not store null rates
         haskey(e, i) && delete!(e, i)
@@ -157,13 +159,13 @@ Base.haskey(e::ExponentialQueue, i) = i ∈ eachindex(e.idx) && @inbounds !iszer
 
 Base.haskey(e::ExponentialQueueDict, i) = haskey(e.idx, i)
 
-Base.getindex(e::AbstractExponentialQueue, i) = haskey(e, i) ? (@inbounds e.acc[e.idx[i]]) : 0.0
+Base.getindex(e::AbstractCumSumQueue, i) = haskey(e, i) ? (@inbounds e.acc[e.idx[i]]) : 0.0
 
 _deleteidx!(e::ExponentialQueueDict, i) = delete!(e.idx, i)
 
 _deleteidx!(e::ExponentialQueue, i) = (@inbounds e.idx[i] = 0)
 
-function Base.delete!(e::AbstractExponentialQueue, i)
+function Base.delete!(e::AbstractCumSumQueue, i)
     @boundscheck haskey(e, i) || throw(BoundsError(e, i))
     @inbounds l, k = e.idx[i], e.ridx[length(e.acc)]
     @inbounds e.acc[l] = e.acc.sums[1][end]
@@ -177,14 +179,14 @@ end
 """
 k,t = peek(Q): Sample next event and time from the queue.
 """
-function Base.peek(e::AbstractExponentialQueue{K,V}; rng = Random.default_rng()) where {K,V}
+function Base.peek(e::AbstractCumSumQueue{K,V}; rng = Random.default_rng()) where {K,V}
     peekevent(e; rng)::K => randexp(rng)/sum(e.acc)::V
 end
 
 """
 peekevent(Q; rng): Sample next event from the queue (with probability proportional to its rate)
 """
-function peekevent(e::AbstractExponentialQueue; rng = Random.default_rng())
+function peekevent(e::AbstractCumSumQueue; rng = Random.default_rng())
     j = searchsortedfirst(e.sum, rand(rng) * sum(e.acc))
     e.ridx[min(j, lastindex(e.ridx))]
 end
@@ -192,13 +194,13 @@ end
 """
 k,t = pop!(Q): Sample next event and time from the queue and remove it from the queue.
 """
-function Base.pop!(e::AbstractExponentialQueue; rng = Random.default_rng())
+function Base.pop!(e::AbstractCumSumQueue; rng = Random.default_rng())
     i, t = peek(e; rng)
     delete!(e, i)
     i => t
 end
 
-Base.isempty(e::AbstractExponentialQueue) = isempty(e.acc)
+Base.isempty(e::AbstractCumSumQueue) = isempty(e.acc)
 
 function Base.empty!(e::ExponentialQueue)
     e.idx .= 0
@@ -216,10 +218,10 @@ Base.values(e::ExponentialQueueDict) = e.acc
 
 Base.keys(e::ExponentialQueueDict) = e.ridx
 
-Base.iterate(e::AbstractExponentialQueue, i = 1) = length(e.acc) < i ? nothing : ((e.ridx[i] => e.acc[i]), i+1)
+Base.iterate(e::AbstractCumSumQueue, i = 1) = length(e.acc) < i ? nothing : ((e.ridx[i] => e.acc[i]), i+1)
 
-Base.eltype(::AbstractExponentialQueue{T,F}) where {T,F} = Pair{T,F}
+Base.eltype(::AbstractCumSumQueue{T,F}) where {T,F} = Pair{T,F}
 
-Base.length(e::AbstractExponentialQueue) = length(e.acc)
+Base.length(e::AbstractCumSumQueue) = length(e.acc)
 
-Base.:(==)(e1::AbstractExponentialQueue, e2::AbstractExponentialQueue) = (Dict(e1) == Dict(e2))
+Base.:(==)(e1::AbstractCumSumQueue, e2::AbstractCumSumQueue) = (Dict(e1) == Dict(e2))

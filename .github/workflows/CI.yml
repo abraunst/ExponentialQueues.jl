@@ -23,7 +23,7 @@ jobs:
           - '1.7'
           - '1.9'
           - '1.10'
-          - 'pre'
+          - 'latest'
         os:
           - ubuntu-latest
         arch:

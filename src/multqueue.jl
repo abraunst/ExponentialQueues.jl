@@ -12,11 +12,11 @@ Base.sum(mq::MultQueue{Q,I,F,F1}) where {Q,I,F,F1} = (mq.f[]*sum(mq.q))::F
 Base.length(mq::MultQueue) = length(mq.q)
 Base.isempty(mq::MultQueue) = isempty(mq.q)
 peekevent(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1} = peekevent(mq.q; rng)::I
-function Base.peek(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1}
+@inline function Base.peek(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1}
     i, t = peek(mq.q; rng)
     return i::I => (t / mq.f[])::F
 end
-function Base.pop!(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1}
+@inline function Base.pop!(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1}
     i, t = pop!(mq.q; rng)
     return i::I => (t / mq.f[])::F
 end

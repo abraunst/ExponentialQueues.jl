@@ -43,7 +43,7 @@ end
 @unroll function _pickqueue(ql,el,r)
     i = 1
     a = 0.0
-    @unroll for q in ql
+    @inbounds @unroll for q in ql
         a += sum(q)
         r <= a && return el[i],ql[i]
         i += 1
@@ -55,7 +55,7 @@ end
     i = 1
     r = rand(rng)*s
     a = 0.0
-    @unroll for q in ql
+    @inbounds @unroll for q in ql
         a += sum(q)
         r <= a && return (el[i],peekevent(ql[i]; rng)) => randexp(rng)/s
         i += 1
@@ -70,7 +70,7 @@ function peekevent(nq::NestedQueue{LQ,LE,E,F,I}; rng = Random.default_rng()) whe
     return e::E, peekevent(q; rng)::I
 end
 
-function Base.peek(nq::NestedQueue{LQ,LE,E,F,I}; rng = Random.default_rng()) where {LQ,LE,E,F,I}
+@inline function Base.peek(nq::NestedQueue{LQ,LE,E,F,I}; rng = Random.default_rng()) where {LQ,LE,E,F,I}
     _peek(nq.qlist, nq.elist, rng, sum(nq))::Pair{Tuple{E,I},F}
 end
 

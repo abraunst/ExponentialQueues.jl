@@ -16,6 +16,8 @@ using Random
     @test isempty(e)
 end
 
+
+
 @testset "StaticExponentialQueue" begin
     e = StaticExponentialQueue(10)
     e[5] = 10
@@ -129,6 +131,10 @@ end
         pop!(N)
     end
     @test isempty(N)
+    Q = ExponentialQueue((1 => 1.0, 2 => Inf))
+    N = NestedQueue(:a => Q, :b => Q)
+    (s,i),t = peek(N)
+    @test i == 2
 end
 
 nothing

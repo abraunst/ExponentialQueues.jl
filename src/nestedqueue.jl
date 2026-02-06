@@ -40,6 +40,18 @@ function Base.iterate(nq::NestedQueue, ss...)
     return ((a, b), v), s
 end
 
+function Base.getindex(nq::NestedQueue, ii::Tuple)
+    i = findfirst(==(ii[1]), nq.elist)
+    nq.qlist[i][ii[2:end]...]
+end
+
+Base.delete!(nq::NestedQueue, ii...) = delete!(nq, ii)
+
+function Base.delete!(nq::NestedQueue, ii::Tuple)
+    i = findfirst(==(ii[1]), nq.elist)
+    delete!(nq.qlist[i], ii[2:end]...)
+end
+
 @unroll function _pickqueue(ql,el,r)
     i = 1
     a = 0.0
@@ -77,6 +89,7 @@ end
 function Base.pop!(nq::NestedQueue; rng = Random.default_rng())
     s = sum(nq)
     e, q = pickqueue(nq; rng, s)
-    i, _ = pop!(q; rng)
+    i = peekevent(q; rng)
+    delete!(q, i)
     return (e, i) => randexp(rng)/s
 end

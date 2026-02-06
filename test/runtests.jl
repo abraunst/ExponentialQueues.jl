@@ -135,6 +135,8 @@ end
     N = NestedQueue(:a => Q, :b => Q)
     (s,i),t = peek(N)
     @test i == 2
+    @test N[(:a,1)] == 1.0
+    @test N[(:b,1)] == 1.0
 end
 
 nothing

@@ -3,14 +3,15 @@ struct MultQueue{Q,I,F,F1} <: AbstractExponentialQueue{I,F}
     f::F1
 end
 
-MultQueue(q::Q,f::F1) where {I, F, Q <: AbstractExponentialQueue{I,F}, F1} = MultQueue{Q,I,promote_type(F,F1),F1}(q,f)
+MultQueue(q::Q,f::F1) where {I, F, Q <: AbstractExponentialQueue{I,F}, F1} = MultQueue{Q,I,F,F1}(q,f)
 
-Base.:*(a::F1, q::Q) where {F1,I,F,Q<:AbstractExponentialQueue{I,F}} = MultQueue{Q,I,promote_type(F,F1),Base.RefValue{F1}}(q, Ref(a))
+Base.:*(a::F1, q::Q) where {F1,I,F,Q<:AbstractExponentialQueue{I,F}} = MultQueue{Q,I,F,F1}(q, a)
 Base.:*(q::Q, a::F1) where {F1,I,F,Q<:AbstractExponentialQueue{I,F}} = a * q
 
 Base.sum(mq::MultQueue{Q,I,F,F1}) where {Q,I,F,F1} = (mq.f[]*sum(mq.q))::F
 Base.length(mq::MultQueue) = length(mq.q)
 Base.isempty(mq::MultQueue) = isempty(mq.q)
+Base.empty!(mq::MultQueue) = empty!(mq.q)
 peekevent(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1} = peekevent(mq.q; rng)::I
 function Base.peek(mq::MultQueue{Q,I,F,F1}; rng = Random.default_rng()) where {Q,I,F,F1}
     i, t = peek(mq.q; rng)

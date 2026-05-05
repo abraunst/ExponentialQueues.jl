@@ -101,7 +101,7 @@ end
     Q = ExponentialQueue((1 => 3.0, 2 => 7.0, 3 => 9.0))
     Q2 = 2Q
     @test Set(keys(Q2)) == Set(keys(Q))
-    Q5 = 5Q
+    Q5 = Ref(5)*Q
     Q5[] = 4
     @test Q5[] == 4
     @test Q2[] == 2

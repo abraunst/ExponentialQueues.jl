@@ -20,7 +20,7 @@ A `NestedQueue` holds a container of exponential queues
 """
 NestedQueue(x, xs...) = NestedQueue((x,xs...))
 
-
+Base.empty!(nq::NestedQueue) = foreach(empty!, nq.qlist)
 Base.isempty(nq::NestedQueue) = all(isempty, nq.qlist)
 
 function Base.sum(nq::NestedQueue{LQ,LE,E,F,I}) where {LQ,LE,E,F,I}
